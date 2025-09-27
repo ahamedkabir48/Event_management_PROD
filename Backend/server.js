@@ -14,6 +14,12 @@ app.use('/api/auth', require('./routes/auth'));   // mounts /api/auth/* routes
 app.use('/api/events', require('./routes/events'));
 app.use('/api/registrations', require('./routes/registrations'));
 
+
+// simple health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // keep any catch‑all last
 app.all('*', (_req, res) => res.status(404).json({ message: 'Not found' }));
 
