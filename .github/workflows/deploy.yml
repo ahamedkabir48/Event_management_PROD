@@ -1,9 +1,9 @@
-name: CI/CD Deploy
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - master   # change if you use a different branch
+      - main   # or your deployment branch
 
 jobs:
   deploy:
@@ -13,34 +13,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Frontend build
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20   # match your react-router requirement
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-        working-directory: frontend
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+          npm run build
 
-      - name: Build frontend
-        run: CI=false npm run build
-        working-directory: frontend
+      - name: Install backend dependencies
+        run: |
+          cd Backend
+          npm install
 
-      # Sync code + build to EC2
-      - name: Deploy via rsync
+      # 🔍 DEBUG STEP: Test SSH connectivity
+      - name: Test SSH connection
+        run: |
+          echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
+          chmod 600 deploy_key
+          ssh -i deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.EC2_HOST }} "echo ✅ SSH connected to EC2 as deploy"
+
+      # 🚀 DEPLOY STEP: Rsync files to EC2
+      - name: Rsync files to EC2
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete
-          path: ./         # sync everything
+          path: ./
           remote_path: /home/deploy/app
           remote_host: ${{ secrets.EC2_HOST }}
           remote_user: deploy
           remote_key: ${{ secrets.DEPLOY_KEY }}
 
-      # Restart server (calls your deploy.sh on EC2)
-      - name: Restart server
+      # 🔄 Restart app using deploy.sh
+      - name: Run deploy script on server
         run: |
-          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key deploy@${{ secrets.EC2_HOST }} 'bash /home/deploy/deploy.sh'
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          ssh -i deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.EC2_HOST }} "bash /home/deploy/deploy.sh"
