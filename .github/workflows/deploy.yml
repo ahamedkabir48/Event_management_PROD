@@ -1,54 +1,46 @@
-name: Deploy to EC2
+name: CI/CD Deploy
 
 on:
   push:
     branches:
-      - master
+      - master   # change if you use a different branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Setup Node.js
+      # Frontend build
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 20   # match your react-router requirement
 
-      # Build frontend
-      - name: Build frontend
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
         working-directory: frontend
-        run: |
-          npm install
-          npm run build
 
-      # Install backend deps
-      - name: Install backend dependencies
-        working-directory: Backend
-        run: npm install
+      - name: Build frontend
+        run: CI=false npm run build
+        working-directory: frontend
 
-      # Copy files to EC2
-      - name: Rsync files to EC2
+      # Sync code + build to EC2
+      - name: Deploy via rsync
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete
-          path: ./   # sync whole repo (or specify only frontend/build + Backend)
+          path: ./         # sync everything
           remote_path: /home/deploy/app
           remote_host: ${{ secrets.EC2_HOST }}
-          remote_user: ${{ secrets.EC2_USER }}
-          remote_key: ${{ secrets.EC2_KEY }}
+          remote_user: deploy
+          remote_key: ${{ secrets.DEPLOY_KEY }}
 
-      # Run deploy script on EC2
-      - name: Run deploy script
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            /home/deploy/deploy.sh
+      # Restart server (calls your deploy.sh on EC2)
+      - name: Restart server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key deploy@${{ secrets.EC2_HOST }} 'bash /home/deploy/deploy.sh'
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
