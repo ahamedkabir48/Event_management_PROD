@@ -1,7 +1,7 @@
 import React from 'react';
-import CreateEventForm from '../components/CreateEventForm';
-import EventList from '../components/EventList';
-import Header from '../components/Header';
+//import CreateEventForm from '../components/CreateEventForm';
+//import EventList from '../components/EventList';
+//import Header from '../components/Header';
 import './HomePage.css';
 
 
