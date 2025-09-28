@@ -1,14 +1,23 @@
-const mongoose = require('mongoose');
-const connectDB = async () => {
-  try {
-    await mongoose.connect('mongodb://localhost:27017/eventmgmt', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error(err.message);
-    process.exit(1);
-  }
-};
-module.exports = connectDB;
+const express = require('express');
+const connectDB = require('./config/db');
+require('dotenv').config();
+
+const app = express();
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(express.json());
+
+// Example health route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Your other routes...
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
