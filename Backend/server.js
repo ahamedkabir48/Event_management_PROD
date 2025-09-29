@@ -14,11 +14,14 @@ app.use('/api/auth', require('./routes/auth'));   // mounts /api/auth/* routes
 app.use('/api/events', require('./routes/events'));
 app.use('/api/registrations', require('./routes/registrations'));
 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
 // simple health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
 
 // keep any catch‑all last
 app.all('*', (_req, res) => res.status(404).json({ message: 'Not found' }));
