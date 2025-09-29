@@ -9,8 +9,8 @@ app.use(cors());
 app.use(express.json());                   // must be before routes
 connectDB();                               // mongoose.connect inside db.js
 
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/events', require('./routes/eventRoutes'));
+//app.use('/api/users', require('./routes/userRoutes'));
+//app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/auth', require('./routes/auth'));   // mounts /api/auth/* routes
 app.use('/api/events', require('./routes/events'));
 app.use('/api/registrations', require('./routes/registrations'));
