@@ -11,6 +11,7 @@ module.exports = function auth(req, res, next) {
     req.user = { id: decoded.userId };
     return next();
   } catch (err) {
+    console.error('❌ Registration error:', err);
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expired' });
     }
