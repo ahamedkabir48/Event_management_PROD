@@ -7,6 +7,8 @@ module.exports = function auth(req, res, next) {
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ message: 'No token' });
   try {
+    console.log("📩 Incoming registration:", req.body);
+console.log("✅ Creating user:", email);
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = { id: decoded.userId };
     return next();
