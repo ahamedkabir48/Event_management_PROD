@@ -9,7 +9,12 @@ const eventSchema = new Schema(
     date: { type: String, required: true },      // e.g., "2025-09-13"
     time: { type: String, required: true },      // e.g., "14:30"
     location: { type: String, required: true, trim: true },
-    description: { type: String, default: '' }
+    description: { type: String, default: '' },
+    createdBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true
+}
   },
   { timestamps: true }
 );

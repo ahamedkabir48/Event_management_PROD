@@ -5,18 +5,26 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
 module.exports = function auth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ message: 'No token' });
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
   try {
-    console.log("📩 Incoming registration:", req.body);
-console.log("✅ Creating user:", email);
+    // Verify the JWT token
     const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Attach user info to request object
     req.user = { id: decoded.userId };
+
     return next();
   } catch (err) {
-    console.error('❌ Registration error:', err);
+    console.error('❌ JWT verification failed:', err.message);
+
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expired' });
     }
+
     return res.status(401).json({ message: 'Invalid token' });
   }
 };

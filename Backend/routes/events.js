@@ -12,12 +12,23 @@ router.post('/', auth, async (req, res) => {
     if (!title || !date || !time || !location) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+
     title = String(title).trim();
     location = String(location).trim();
 
-    const evt = await Event.create({ title, date, time, location, description });
+    // Associate event with logged-in user
+    const evt = await Event.create({
+      title,
+      date,
+      time,
+      location,
+      description,
+      createdBy: req.user.userId, // 👈 Add this line
+    });
+
     return res.status(201).json(evt);
   } catch (err) {
+    console.error('Event creation failed:', err);
     return res.status(400).json({ message: 'Failed to create event' });
   }
 });
