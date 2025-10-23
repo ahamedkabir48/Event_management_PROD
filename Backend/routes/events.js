@@ -5,45 +5,67 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// POST /api/events -> create an event
+/**
+ * @route   POST /api/events
+ * @desc    Create a new event (only for logged-in users)
+ * @access  Private
+ */
 router.post('/', auth, async (req, res) => {
   try {
-    let { title, date, time, location, description } = req.body;
+    const { title, date, time, location, description } = req.body;
+
+    // Validate required fields
     if (!title || !date || !time || !location) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    title = String(title).trim();
-    location = String(location).trim();
-
-    // Associate event with logged-in user
-    const evt = await Event.create({
-      title,
+    // Create event with user reference
+    const newEvent = await Event.create({
+      title: title.trim(),
       date,
       time,
-      location,
+      location: location.trim(),
       description,
-      createdBy: req.user.userId, // 👈 Add this line
+      createdBy: req.user.id, // from middleware
     });
 
-    return res.status(201).json(evt);
+    return res.status(201).json(newEvent);
   } catch (err) {
-    console.error('Event creation failed:', err);
-    return res.status(400).json({ message: 'Failed to create event' });
+    console.error('❌ Error creating event:', err.message);
+    return res.status(500).json({ message: 'Failed to create event' });
   }
 });
 
-// GET /api/events/getAll -> list events
+/**
+ * @route   GET /api/events/getAll
+ * @desc    Get all events (public)
+ */
 router.get('/getAll', async (_req, res) => {
-  const events = await Event.find().sort({ createdAt: -1 });
-  return res.json(events);
+  try {
+    const events = await Event.find()
+      .populate('createdBy', 'username email')
+      .sort({ createdAt: -1 });
+
+    return res.json(events);
+  } catch (err) {
+    console.error('❌ Error fetching events:', err.message);
+    return res.status(500).json({ message: 'Failed to fetch events' });
+  }
 });
 
-// GET /api/events/:id -> single event
+/**
+ * @route   GET /api/events/:id
+ * @desc    Get single event details
+ */
 router.get('/:id', async (req, res) => {
-  const evt = await Event.findById(req.params.id);
-  if (!evt) return res.status(404).json({ message: 'Event not found' });
-  return res.json(evt);
+  try {
+    const event = await Event.findById(req.params.id).populate('createdBy', 'username email');
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+    return res.json(event);
+  } catch (err) {
+    console.error('❌ Error fetching event:', err.message);
+    return res.status(500).json({ message: 'Failed to fetch event' });
+  }
 });
 
 module.exports = router;

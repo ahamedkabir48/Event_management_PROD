@@ -1,20 +1,34 @@
 // backend/models/Event.js
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
 
-const eventSchema = new Schema(
+const eventSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
-    // Store date and time separately (string) or merge into a Date in your controller
-    date: { type: String, required: true },      // e.g., "2025-09-13"
-    time: { type: String, required: true },      // e.g., "14:30"
-    location: { type: String, required: true, trim: true },
-    description: { type: String, default: '' },
+    title: {
+      type: String,
+      required: [true, 'Title is required'],
+      trim: true,
+    },
+    date: {
+      type: String,
+      required: [true, 'Date is required'],
+    },
+    time: {
+      type: String,
+      required: [true, 'Time is required'],
+    },
+    location: {
+      type: String,
+      required: [true, 'Location is required'],
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
     createdBy: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User',
-  required: true
-}
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   { timestamps: true }
 );

@@ -1,16 +1,23 @@
-// Backend/models/Registration.js
+// backend/models/Registration.js
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
 
-const registrationSchema = new Schema(
+const registrationSchema = new mongoose.Schema(
   {
-    user:  { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    event: { type: Schema.Types.ObjectId, ref: 'Event', required: true }
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    event: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-// Prevent duplicate registrations by the same user for the same event
+// Ensure one registration per user per event
 registrationSchema.index({ user: 1, event: 1 }, { unique: true });
 
 module.exports = mongoose.model('Registration', registrationSchema);

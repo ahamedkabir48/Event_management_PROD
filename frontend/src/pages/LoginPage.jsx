@@ -1,63 +1,79 @@
+// src/pages/LoginPage.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../api';
 import './LoginPage.css';
 
-function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginPage() {
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setBusy(true);
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, { email, password });
-      localStorage.setItem('token', res.data.token);
-      navigate('/home');
-    } catch {
-      alert('Login failed!');
+      const res = await api.post('/auth/login', form);
+      const { token, username } = res.data;
+
+      // ✅ store token + username for later use
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
+
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Login failed';
+      setError(msg);
+    } finally {
+      setBusy(false);
     }
   };
 
-return (
-  <div className="login">
-    <div className="login-card">
-      <h2 className="login-title">Log in</h2>
+  return (
+    <main className="login">
+      <div className="login-card">
+        <h1>Log in</h1>
 
-      <form className="login-form" onSubmit={handleSubmit}>
-        <div className="field">
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-          />
-        </div>
+        {error && <div className="error" role="alert">{error}</div>}
 
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+        <form className="login-form" onSubmit={onSubmit}>
+          <div className="field">
+            <label>Email</label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={onChange}
+              autoComplete="email"
+              required
+            />
+          </div>
 
-        <button className="submit" type="submit">Log In</button>
-      </form>
+          <div className="field">
+            <label>Password</label>
+            <input
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={onChange}
+              autoComplete="current-password"
+              required
+            />
+          </div>
 
-      <p className="hint">
-        No account? <a href="/register">Register</a>
-      </p>
-    </div>
-  </div>
-);
+          <button className="submit" type="submit" disabled={busy}>
+            {busy ? 'Logging in…' : 'Login'}
+          </button>
+        </form>
 
+        <p className="hint">
+          Don’t have an account? <Link to="/register">Register</Link>
+        </p>
+      </div>
+    </main>
+  );
 }
-
-export default LoginPage;
