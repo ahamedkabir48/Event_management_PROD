@@ -12,7 +12,10 @@ function LoginPage() {
     e.preventDefault();
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, { email, password });
+      //localStorage.setItem('token', res.data.token);
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('username', res.data.username);
+
       navigate('/home');
     } catch {
       alert('Login failed!');

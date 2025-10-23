@@ -11,12 +11,8 @@ module.exports = function auth(req, res, next) {
   }
 
   try {
-    // Verify the JWT token
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    // Attach user info to request object
     req.user = { id: decoded.userId };
-
     return next();
   } catch (err) {
     console.error('❌ JWT verification failed:', err.message);
