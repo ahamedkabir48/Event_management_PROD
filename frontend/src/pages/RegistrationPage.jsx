@@ -1,7 +1,7 @@
 // src/pages/RegistrationPage.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import api from '../api'; // axios.create({ baseURL: 'http://localhost:5000/api' })
 import './RegistrationPage.css';
 
 export default function RegistrationPage() {
@@ -13,12 +13,11 @@ export default function RegistrationPage() {
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const onSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // prevent full page reload so SPA handles the submit
     setError('');
     setBusy(true);
     try {
       await api.post('/auth/register', form);
-      alert('✅ Registration successful! Please log in.');
       navigate('/login', { replace: true });
     } catch (err) {
       const msg = err?.response?.data?.message || 'Registration failed';
@@ -33,51 +32,54 @@ export default function RegistrationPage() {
       <div className="register-card">
         <h1>Create your account</h1>
 
-        {error && <div className="error">{error}</div>}
+        {error && <div className="error" role="alert">{error}</div>}
 
-        <form onSubmit={onSubmit}>
+        <form className="register-form" onSubmit={onSubmit}>
           <div className="field">
-            <label>Username</label>
+            <label htmlFor="username">Username</label>
             <input
+              id="username"
               name="username"
               value={form.username}
               onChange={onChange}
+              autoComplete="username"
               required
-              placeholder="Enter your name"
             />
           </div>
 
           <div className="field">
-            <label>Email</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="email"
+              id="email"
               name="email"
+              type="email"
               value={form.email}
               onChange={onChange}
+              autoComplete="email"
               required
-              placeholder="Enter your email"
             />
           </div>
 
           <div className="field">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input
-              type="password"
+              id="password"
               name="password"
+              type="password"
               value={form.password}
               onChange={onChange}
+              autoComplete="new-password"
               required
-              placeholder="Enter your password"
             />
           </div>
 
-          <button type="submit" disabled={busy}>
+          <button className="submit" type="submit" disabled={busy}>
             {busy ? 'Creating account…' : 'Register'}
           </button>
         </form>
 
         <p className="hint">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>
     </main>
