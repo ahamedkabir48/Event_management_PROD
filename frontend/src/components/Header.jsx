@@ -8,8 +8,9 @@ export default function Header() {
   const linkClass = ({ isActive }) => 'nav-link' + (isActive ? ' active' : '');
 
   const logout = () => {
-    localStorage.removeItem('token');         // clear token on logout [13]
-    navigate('/login', { replace: true });    // redirect to login [3]
+    localStorage.removeItem('token');
+  localStorage.removeItem('username');  // optional
+  navigate('/login', { replace: true });
   };
 
   return (
