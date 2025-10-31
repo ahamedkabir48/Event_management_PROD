@@ -29,17 +29,22 @@ jobs:
           cd Backend
           npm install
 
-      # 🗃️ Create backup of the repository
+      # 🗃️ Create timestamped backup
       - name: Create timestamped backup
         run: |
           TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
           BACKUP_NAME="backup-$TIMESTAMP.tar.gz"
-          tar -czf $BACKUP_NAME --exclude='.git' --exclude='node_modules' .
           mkdir -p backups
-          mv $BACKUP_NAME backups/
-          echo "Backup created: $BACKUP_NAME"
+          tar --warning=no-file-changed -czf backups/$BACKUP_NAME \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='frontend/node_modules' \
+            --exclude='Backend/node_modules' \
+            .
+          echo "✅ Backup created: backups/$BACKUP_NAME"
 
-      # 📦 Upload backup as an artifact (kept for 10 days)
+      # 📦 Upload backup artifact (kept for 10 days)
       - name: Upload backup artifact
         uses: actions/upload-artifact@v4
         with:
