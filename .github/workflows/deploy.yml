@@ -29,6 +29,24 @@ jobs:
           cd Backend
           npm install
 
+      # 🗃️ Create backup of the repository
+      - name: Create timestamped backup
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          BACKUP_NAME="backup-$TIMESTAMP.tar.gz"
+          tar -czf $BACKUP_NAME --exclude='.git' --exclude='node_modules' .
+          mkdir -p backups
+          mv $BACKUP_NAME backups/
+          echo "Backup created: $BACKUP_NAME"
+
+      # 📦 Upload backup as an artifact (kept for 10 days)
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-backup-${{ github.run_id }}
+          path: backups/
+          retention-days: 10
+
       # 🔍 DEBUG STEP: Test SSH connectivity
       - name: Test SSH connection
         run: |
@@ -41,7 +59,7 @@ jobs:
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete --exclude=node_modules --exclude=.git --exclude='.env'
-          path: ./
+          path: ./ 
           remote_path: /home/deploy/app
           remote_host: ${{ secrets.EC2_HOST }}
           remote_user: deploy
