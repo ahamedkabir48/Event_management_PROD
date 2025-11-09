@@ -82,7 +82,8 @@ export default function EventsPage() {
               <div className="event-info">
                 <h3>{ev.title}</h3>
                 <p className="muted">
-                  {ev.location} • {new Date(ev.date).toLocaleDateString()} • {ev.time}
+
+                  {ev.description} • {ev.location} • {new Date(ev.date).toLocaleDateString()} • {ev.time}
                 </p>
                 <p>
                   <strong>Created By:</strong> {ev.createdBy?.username || 'Unknown'}
