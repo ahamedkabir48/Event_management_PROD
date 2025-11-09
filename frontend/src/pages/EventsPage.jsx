@@ -81,11 +81,15 @@ export default function EventsPage() {
             <div key={ev._id} className="event-card">
               <div className="event-info">
                 <h3>{ev.title}</h3>
-                <p className="muted">
-
-                  {ev.description} • {ev.location} • {new Date(ev.date).toLocaleDateString()} • {ev.time}
+                <p >
+                  <strong>Description: </strong>{ev.description} 
+                  </p>
+                  <p>
+                  <strong>Location: </strong> {ev.location} 
+                  </p>
+                  <p>
+                  <strong>Date & Time: </strong> {new Date(ev.date).toLocaleDateString()} • {ev.time}
                 </p>
-                <p>
                   <strong>Created By:</strong> {ev.createdBy?.username || 'Unknown'}
                 </p>
                 <p><strong>Total Registrations Count:</strong> {ev.registrationCount || 0}</p>
