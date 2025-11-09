@@ -1,0 +1,4 @@
+.home { min-height: calc(100vh - 56px); display:grid; place-items:center; padding:24px; }
+.hero { text-align:center; }
+.hero h1 { margin:0 0 8px; font-size:2rem; font-weight:800; }
+.hero p { color:#6b7280; }

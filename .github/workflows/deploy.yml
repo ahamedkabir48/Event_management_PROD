@@ -1,0 +1,44 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
+          chmod 600 deploy_key
+
+      - name: Create backup
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          mkdir -p backups
+          tar --warning=no-file-changed -czf backups/backup-$TIMESTAMP.tar.gz \
+            --exclude='.git' \
+            --exclude='**/node_modules' \
+            --exclude='.env' \
+            .
+          echo "✅ Backup created"
+
+      - name: Sync files to EC2
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete --exclude='**/node_modules' --exclude='.git' --exclude='.env'
+          path: ./
+          remote_path: /home/deploy/app
+          remote_host: ${{ secrets.EC2_HOST }}
+          remote_user: deploy
+          remote_key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.EC2_HOST }} "bash /home/deploy/deploy.sh"
