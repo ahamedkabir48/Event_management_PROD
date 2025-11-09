@@ -95,7 +95,7 @@ export default function EventsPage() {
                   className="btn primary"
                   onClick={() => handleViewRegistrations(ev)}
                 >
-                  View Registrations
+                  View Participants
                 </button>
               ) : (
                 <button
