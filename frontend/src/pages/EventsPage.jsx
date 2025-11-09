@@ -90,6 +90,7 @@ export default function EventsPage() {
                   <p>
                   <strong>Date & Time: </strong> {new Date(ev.date).toLocaleDateString()} • {ev.time}
                 </p>
+                <p>
                   <strong>Created By:</strong> {ev.createdBy?.username || 'Unknown'}
                 </p>
                 <p><strong>Total Registrations Count:</strong> {ev.registrationCount || 0}</p>
